@@ -7,7 +7,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git 'https://github.com/your-username/driver-monitoring-app.git'
+        git 'https://github.com/2021wa15539@wilp.bits-pilani.ac.in/driver-monitoring-app.git'
       }
     }
     stage('Build Docker Image') {
@@ -18,8 +18,8 @@ pipeline {
     stage('Push to ECR') {
       steps {
         sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.$AWS_REGION.amazonaws.com'
-        sh 'docker tag $ECR_REPO:latest <your-account-id>.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest'
-        sh 'docker push <your-account-id>.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest'
+        sh 'docker tag $ECR_REPO:latest <2021wa15539@wilp.bits-pilani.ac.in>.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest'
+        sh 'docker push <2021wa15539@wilp.bits-pilani.ac.in>.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest'
       }
     }
     stage('Deploy to EKS') {
