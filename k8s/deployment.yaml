@@ -14,7 +14,6 @@ spec:
     spec:
       containers:
       - name: driver-monitoring
-        image: <your-account-id>.dkr.ecr.ap-south-1.amazonaws.com/eks-automation-repo:latest
+        image: 011528274176.dkr.ecr.ap-south-1.amazonaws.com/eks-automation-repo:latest
         ports:
         - containerPort: 80
-

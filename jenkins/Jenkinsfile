@@ -3,6 +3,10 @@ pipeline {
   environment {
     AWS_REGION = "ap-south-1"
     ECR_REPO = "eks-automation-repo"
+    // Set your AWS account id here or inject via Jenkins credentials/params
+    AWS_ACCOUNT_ID = "<your-account-id>"
+    // Jenkins provides BUILD_NUMBER; use it to tag images. When running locally this may be empty.
+    IMAGE_TAG = "${BUILD_NUMBER}"
   }
   stages {
     stage('Checkout') {
@@ -12,19 +16,21 @@ pipeline {
     }
     stage('Build Docker Image') {
       steps {
-        sh 'docker build -t $ECR_REPO:latest ./src'
+        // Build from repo root and explicitly point to Dockerfile in docker/
+        sh "docker build -f docker/Dockerfile -t ${ECR_REPO}:${IMAGE_TAG} ."
       }
     }
     stage('Push to ECR') {
       steps {
-        sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.$AWS_REGION.amazonaws.com'
-        sh 'docker tag $ECR_REPO:latest <2021wa15539@wilp.bits-pilani.ac.in>.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest'
-        sh 'docker push <2021wa15539@wilp.bits-pilani.ac.in>.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest'
+        sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        sh "docker tag ${ECR_REPO}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
+        sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}"
       }
     }
     stage('Deploy to EKS') {
       steps {
-        sh 'kubectl apply -f k8s/deployment.yaml'
+        // Update the deployment image in-cluster to the new tag. This avoids manifest templating in the repo.
+        sh "kubectl set image deployment/driver-monitoring-app driver-monitoring=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG} --record"
       }
     }
   }
