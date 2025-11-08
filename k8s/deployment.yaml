@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: driver-monitoring-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: driver-monitoring
+  template:
+    metadata:
+      labels:
+        app: driver-monitoring
+    spec:
+      containers:
+      - name: driver-monitoring
+        image: <your-account-id>.dkr.ecr.ap-south-1.amazonaws.com/eks-automation-repo:latest
+        ports:
+        - containerPort: 80
+
